@@ -18,9 +18,29 @@ GROUP BY customer_id;
 
 -- 3. What was the first item from the menu purchased by each customer?
 
+with sale_order as (
+  SELECT a.customer_id, a.order_date, a.product_id, b.product_name,
+  DENSE_RANK() OVER (
+    PARTITION BY a.customer_id
+    	ORDER BY a.order_date) ranked
+    FROM dannys_diner.sales a
+    LEFT JOIN dannys_diner.menu b
+    ON a.product_id = b.product_id
+  )
+ SELECT distinct customer_id, product_name
+ FROM sale_order
+ WHERE ranked = 1;
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 
+SELECT
+  	a.product_name, count(b.order_date) as count_bought
+    FROM dannys_diner.sales b
+ 	LEFT JOIN dannys_diner.menu a
+    ON a.product_id = b.product_id
+    GROUP BY a.product_name
+    ORDER BY count_bought DESC
+    LIMIT 1;
 
 -- 5. Which item was the most popular for each customer?
 
